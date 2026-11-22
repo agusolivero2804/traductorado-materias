@@ -249,11 +249,11 @@ function card(x){
  const seg=`<div class="seg${x.noReg?' two':''}" role="group" aria-label="Estado de ${x.n}">${opts.map(([v,t])=>{const dis=v===1?!cr:v===2?!ca:false;return `<button type="button" class="s${v}" data-set="${x.id}" data-l="${v}" aria-pressed="${l===v}" ${dis&&l!==v?'disabled':''} title="${dis?'Te faltan correlativas':''}">${t}</button>`}).join('')}</div>`;
  const warn=okState(x)?'':`<p class="warn">Ya no cumplís las correlativas para este estado. Revisá las que no se cumplen.</p>`;
  const gr=x.ing?'':`<div class="gr"><label for="n-${x.id}">Nota final <input type="number" id="n-${x.id}" data-nota="${x.id}" min="4" max="10" step="1" inputmode="numeric" value="${d.n??''}" ${l===2?'':'disabled'} placeholder="4–10"></label>
-  <div class="apl"><span>Aplazos:</span>${(d.a||[]).map((v,i)=>`<button type="button" class="ap" data-del="${x.id}" data-i="${i}" title="Quitar aplazo">${v} ×</button>`).join('')||'<span class="tag">ninguno</span>'}
-  <input type="number" id="a-${x.id}" min="0" max="3" step="1" inputmode="numeric" aria-label="Nota del aplazo en ${x.n}" placeholder="0–3"><button type="button" class="mini" data-add="${x.id}">Agregar</button></div></div>`;
+  <div class="apl"><span title="Agregá uno por cada examen desaprobado, con su nota">Aplazos:</span>${(d.a||[]).map((v,i)=>`<button type="button" class="ap" data-del="${x.id}" data-i="${i}" title="Quitar aplazo">${v} ×</button>`).join('')||'<span class="tag">ninguno</span>'}
+  <input type="number" id="a-${x.id}" min="0" max="3" step="1" inputmode="numeric" aria-label="Nota del aplazo en ${x.n} (0 a 3)" placeholder="nota" title="Nota con la que te aplazaron (0 a 3)"><button type="button" class="mini" data-add="${x.id}">+ Aplazo</button></div></div>`;
  return `<article class="card l${l}" id="m-${x.id}"><h3>${x.n}${x.opt?' <span class="tag">(optativa)</span>':''}</h3><div class="req">${pills}${ra}</div>${seg}${warn}${gr}</article>`;
 }
-const addAp=id=>{const inp=$('a-'+id),v=Number(inp.value);if(inp.value===''||!Number.isInteger(v)||v<0||v>3){inp.setCustomValidity('Un aplazo va de 0 a 3');inp.reportValidity();return}commit(()=>set(id,{a:[...(g(id).a||[]),v]}));const n=$('a-'+id);n&&n.focus()};
+const addAp=id=>{const inp=$('a-'+id),v=Number(inp.value);if(inp.value===''||!Number.isInteger(v)||v<0||v>3){inp.setCustomValidity('Poné la nota con la que te aplazaron: de 0 a 3. Podés agregar todos los aplazos que quieras.');inp.reportValidity();return}commit(()=>set(id,{a:[...(g(id).a||[]),v]}));const n=$('a-'+id);n&&n.focus()};
 document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
  if(t.dataset.set){const id=t.dataset.set,v=+t.dataset.l;if(lv(id)!==v)commit(()=>set(id,{l:v}))}
  else if(t.dataset.add)addAp(t.dataset.add);
