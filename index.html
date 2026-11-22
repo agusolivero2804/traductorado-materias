@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#d63a76">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Traductorado">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Mi Traductorado UNC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday study tool, calm and exact
+   IDEA the student's libreta universitaria: stamped in pink ink when aprobada, soft pink highlighter when regular
+   PICTURE the whole plan as a grid of tiles by year, each tile coloured by its state, clickable
+   COLOUR white paper and a deep pink band, soft pink for regular, strong pink for aprobada
+   TYPE Archivo 800 for titles and figures, Archivo for text
+   LAYOUT laptop: band with title, plan grid left and figures right; years below as card grids. Phone: title, grid, figures, years */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#170b11);--ink:light-dark(#2a1520,#f6e9ef);--mut:light-dark(#7a5867,#c5a3b3);--line:light-dark(#f2d3df,#40222f);--card:light-dark(#fff5f8,#24121b);--band:light-dark(#d63a76,#6e1d42);--blue:light-dark(#c2185b,#ff8fbb);--hl:#ffc4da;--hlink:#5a1030;--warn:light-dark(#b83d0b,#fb8f4a);--okc:light-dark(#1d7a46,#5fd38f)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 Archivo,system-ui,sans-serif;overflow-x:clip}
+.band{padding-block:clamp(24px,4vw,48px);padding-left:max(5vw,16px);padding-right:max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+header.band{background:var(--band);color:#fff}
+h1{font-size:clamp(32px,5vw,48px);line-height:1.05;letter-spacing:-.02em;margin:0 0 6px;font-weight:800;text-wrap:balance}
+.sub{margin:0;color:#ffe3ee;max-width:62ch}
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;margin-top:24px;align-items:stretch}
+.plan{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.col{display:flex;flex-direction:column;gap:6px}
+.col h4{margin:0 0 2px;font-size:13px;font-weight:600;color:#ffe3ee}
+.tile{height:38px;border-radius:6px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff0f5;font:700 13px Archivo,sans-serif;cursor:pointer;padding:0 4px;white-space:nowrap;overflow:hidden}
+.tile.l1{background:var(--hl);color:var(--hlink);border-color:var(--hl)}
+.tile.l2{background:#fff;color:#c2185b;border-color:#fff}
+.tile.opt{border-style:dashed}
+.tile.bad{box-shadow:inset 0 0 0 3px #5a1030}
+.tile:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:13px;color:#ffe3ee}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3)}
+.legend .k1{background:var(--hl);border-color:var(--hl)}
+.legend .k2{background:#fff}
+.figs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-content:start}
+.fig1{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 14px}
+.fig1 b{display:block;font-size:clamp(28px,4vw,40px);line-height:1.05;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fig1 span{font-size:13px;color:#ffe3ee}
+.fig1.wide{grid-column:1/-1}
+.bar{height:10px;border-radius:5px;background:rgba(255,255,255,.14);overflow:hidden;display:flex;margin-top:10px}
+.bar>div{height:100%}
+.note{font-size:13px;color:#ffffff;margin:8px 0 0}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:18px}
+.btn{font:600 15px Archivo,sans-serif;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;cursor:pointer}
+.btn:hover:not(:disabled){background:rgba(255,255,255,.1)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.danger{border-color:#fff;color:#fff}
+.btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.sample{font-size:13px;color:#ffffff;margin:10px 0 0}
+.next{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;border-bottom:1px solid var(--line)}
+.next h2,.year h2{font-size:22px;line-height:1.15;margin:0 0 8px;letter-spacing:-.01em}
+.next p{margin:0;color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 14px Archivo,sans-serif;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.chip:hover{border-color:var(--blue)}
+.year{border-bottom:1px solid var(--line);scroll-margin-top:56px}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.sbar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:6px max(5vw,16px)}
+.sbar .wrap{display:flex;gap:6px 14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.yrs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-block:2px}
+.yrs::-webkit-scrollbar{display:none}
+.yrs button{flex:none;font:600 14px Archivo,sans-serif;min-height:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.yrs button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.mst{font-size:14px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--mut)}
+.mst b{color:var(--ink)}
+.yh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:14px}
+.yh span{color:var(--mut);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;scroll-margin-top:80px}
+.card.l1{border-color:color-mix(in srgb,var(--hl) 80%,transparent);box-shadow:inset 4px 0 0 var(--hl)}
+.card.l2{border-color:color-mix(in srgb,var(--blue) 55%,transparent);box-shadow:inset 4px 0 0 var(--blue)}
+.card.flash{outline:3px solid var(--blue);outline-offset:2px}
+.card h3{margin:0;font-size:17px;line-height:1.25;font-weight:700}
+.tag{font-size:13px;color:var(--mut);font-weight:500}
+.req{font-size:13px;color:var(--mut);display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.pill{border-radius:5px;padding:1px 7px;border:1px solid var(--line);white-space:nowrap}
+.pill.ok{color:var(--okc);border-color:color-mix(in srgb,var(--okc) 45%,transparent)}
+.pill.no{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.seg button{font:600 14px Archivo,sans-serif;min-height:44px;border:0;border-right:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;padding:0 4px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true].s0{background:color-mix(in srgb,var(--mut) 22%,var(--bg))}
+.seg button[aria-pressed=true].s1{background:var(--hl);color:var(--hlink)}
+.seg button[aria-pressed=true].s2{background:var(--blue);color:var(--bg)}
+.seg button:disabled{color:color-mix(in srgb,var(--mut) 55%,transparent);cursor:not-allowed;background:var(--card)}
+.seg button:focus-visible,.chip:focus-visible,.mini:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.warn{font-size:13px;color:var(--warn);margin:0}
+.gr{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;font-size:14px}
+.gr label{display:flex;align-items:center;gap:8px;font-weight:600}
+input[type=number]{font:16px Archivo,sans-serif;width:4.4em;min-height:40px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);padding:0 8px}
+input:disabled{opacity:.5}
+.apl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.apl>span{font-weight:600}
+.mini{font:600 14px Archivo,sans-serif;min-height:40px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);padding:0 10px;cursor:pointer}
+.ap{font:600 14px Archivo,sans-serif;border:1px solid color-mix(in srgb,var(--warn) 50%,transparent);color:var(--warn);background:transparent;border-radius:999px;padding:4px 12px;cursor:pointer;min-height:40px}
+details{margin-top:14px;font-size:14px;color:#fff0f5}
+summary{cursor:pointer;min-height:32px}
+textarea{width:100%;min-height:90px;font:14px ui-monospace,monospace;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.2);color:#fff;padding:8px;margin:8px 0}
+footer{padding:20px max(5vw,16px) 36px;color:var(--mut);font-size:13px}
+footer a{color:var(--blue)}
+@media(max-width:860px){.hero{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.next{grid-template-columns:minmax(0,1fr)}.plan{gap:4px}.col{gap:4px}.tile{height:40px;padding:0 2px}.mst{width:100%}.band.year{padding-block:22px}.card{padding:12px}.figs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header class="band">
+ <div class="wrap">
+  <h1>Mi Traductorado de Inglés</h1>
+  <p class="sub">Traductorado Público Nacional de Inglés, Facultad de Lenguas, UNC. Marcá cada materia como sin cursar, regular o aprobada: las correlativas habilitan las siguientes.</p>
+  <div class="hero">
+   <div>
+    <div class="plan" id="plan"></div>
+    <div class="legend"><span><i></i>Sin cursar / libre</span><span><i class="k1"></i>Regular</span><span><i class="k2"></i>Aprobada</span><span>Borde punteado: optativa</span></div>
+   </div>
+   <div>
+    <div class="figs" id="figs"></div>
+    <p class="note" id="note"></p>
+   </div>
+  </div>
+  <div class="tools">
+   <button class="btn" id="undo" type="button">Deshacer</button>
+   <button class="btn" id="copy" type="button">Copiar mis datos</button>
+   <button class="btn danger" id="reset" type="button">Empezar de cero</button>
+  </div>
+  <details>
+   <summary>Pasar mis datos a otro navegador</summary>
+   Copiá tus datos con el botón de arriba y pegalos acá en el otro navegador.
+   <textarea id="imp" aria-label="Datos para importar"></textarea>
+   <button class="btn" id="doimp" type="button">Importar</button> <span id="impmsg"></span>
+  </details>
+ </div>
+</header>
+<nav class="sbar" aria-label="Ir a un año"><div class="wrap"><div class="yrs" id="yrs"></div><div class="mst" id="mst"></div></div></nav>
+<section class="band next"><div class="wrap" style="display:contents">
+ <div><h2>Podés anotarte a cursar</h2><div class="chips" id="canc"></div></div>
+ <div><h2>Regulares que ya podés rendir</h2><div class="chips" id="canr"></div></div>
+</div></section>
+<main id="years"></main>
+<footer>Correlatividades según la propuesta de flexibilización de la Facultad de Lenguas aprobada en 2025 (<a href="https://boletin.unc.edu.ar/bitstreams/94943d20-6d37-4f90-8a92-b4d976e6189b/download">documento oficial</a>). Para cursar hay que tener las correlativas regularizadas; para rendir, aprobadas. Gabinete de Traducción / Introducción a la Interpretación pide Lengua Inglesa III y Gramática Contrastiva aprobadas ya para cursar. Verificá con el plan vigente antes de inscribirte. Tus datos quedan guardados solo en este navegador.</footer>
+<script>
+{
+const S=[
+{id:'lecn',y:0,n:'Lengua Extranjera CN (Inglés)',s:'LE CN',ab:'LE',ing:1},
+{id:'lccn',y:0,n:'Lengua Castellana CN',s:'Castellana CN',ab:'LC',ing:1},
+{id:'ps',y:0,n:'Prueba de Suficiencia',s:'Suficiencia',ab:'PS',ing:1,noReg:1},
+{id:'li1',y:1,n:'Lengua Inglesa I',s:'Lengua I',ab:'LI1',c:['lecn']},
+{id:'pg',y:1,n:'Práctica Gramatical del Inglés',s:'Práct. Gramatical',ab:'PG',c:['lecn']},
+{id:'pp',y:1,n:'Práctica de la Pronunciación del Inglés',s:'Práct. Pronunciación',ab:'PP',c:['lecn']},
+{id:'lc1',y:1,n:'Lengua Castellana I',s:'Castellana I',ab:'LC1',c:['lccn']},
+{id:'it',y:1,n:'Introducción a la Traductología',s:'Intro. Traductología',ab:'IT',c:['lecn']},
+{id:'lat1',y:1,n:'Lengua y Cultura Latina I',s:'Latina I',ab:'LA1',c:['lccn'],opt:1},
+{id:'li2',y:2,n:'Lengua Inglesa II',s:'Lengua II',ab:'LI2',c:['li1']},
+{id:'gi1',y:2,n:'Gramática Inglesa I',s:'Gramática I',ab:'GI1',c:['pg']},
+{id:'ff1',y:2,n:'Fonética y Fonología I',s:'Fonética I',ab:'FF1',c:['pp']},
+{id:'lc2',y:2,n:'Lengua Castellana II',s:'Castellana II',ab:'LC2',c:['lc1']},
+{id:'tpi',y:2,n:'Teoría y Práctica de la Investigación',s:'Investigación',ab:'TPI',c:['lc1']},
+{id:'myt',y:2,n:'Métodos y Técnicas de la Traducción',s:'Métodos',ab:'MT',c:['li1','it']},
+{id:'tyd',y:2,n:'Terminología y Documentación',s:'Terminología',ab:'TD',c:['li1','it']},
+{id:'lat2',y:2,n:'Lengua y Cultura Latina II',s:'Latina II',ab:'LA2',c:['lat1'],opt:1},
+{id:'li3',y:3,n:'Lengua Inglesa III',s:'Lengua III',ab:'LI3',c:['li2','pg','pp']},
+{id:'gi2',y:3,n:'Gramática Inglesa II',s:'Gramática II',ab:'GI2',c:['gi1','li1']},
+{id:'ff2',y:3,n:'Fonética y Fonología II',s:'Fonética II',ab:'FF2',c:['ff1','li1']},
+{id:'tcom',y:3,n:'Traducción Comercial',s:'T. Comercial',ab:'TCo',c:['myt','tyd']},
+{id:'ttec',y:3,n:'Traducción Técnica',s:'T. Técnica',ab:'TTe',c:['myt','tyd']},
+{id:'der',y:3,n:'Elementos del Derecho Aplicados a la Traducción',s:'Derecho',ab:'ED',c:['it']},
+{id:'li4',y:4,n:'Lengua Inglesa IV',s:'Lengua IV',ab:'LI4',c:['li3','gi1','ff1']},
+{id:'gc',y:4,n:'Gramática Contrastiva',s:'G. Contrastiva',ab:'GC',c:['gi2','lc2','li2']},
+{id:'ling1',y:4,n:'Lingüística I',s:'Lingüística I',ab:'Lg1',c:['gi2','li2']},
+{id:'tjur',y:4,n:'Traducción Jurídica',s:'T. Jurídica',ab:'TJ',c:['der','myt','tyd']},
+{id:'cc1',y:4,n:'Cultura y Civilización de los Pueblos de Habla Inglesa I',s:'Cultura I',ab:'CC1',c:['li3']},
+{id:'lit',y:4,n:'Introducción a la Literatura de Habla Inglesa',s:'Intro. Literatura',ab:'IL',c:['li3']},
+{id:'li5',y:5,n:'Lengua Inglesa V',s:'Lengua V',ab:'LI5',c:['li4']},
+{id:'ling2',y:5,n:'Lingüística II',s:'Lingüística II',ab:'Lg2',c:['ling1']},
+{id:'tcie',y:5,n:'Traducción Científica',s:'T. Científica',ab:'TCi',c:['gc']},
+{id:'tper',y:5,n:'Traducción Periodística',s:'T. Periodística',ab:'TPe',c:['gc']},
+{id:'tlit',y:5,n:'Traducción Literaria',s:'T. Literaria',ab:'TL',c:['lit','gc']},
+{id:'cc2',y:5,n:'Cultura y Civilización de los Pueblos de Habla Inglesa II',s:'Cultura II',ab:'CC2',c:['cc1']},
+{id:'gab',y:5,n:'Gabinete de Traducción o Introducción a la Interpretación',s:'Gabinete / Interp.',ab:'GT',ca:['li3','gc']}
+];
+const YN=['Ingreso','1.er año','2.º año','3.er año','4.º año','5.º año'];
+const B={};S.forEach(x=>B[x.id]=x);
+const KEY='trad-ingles-unc-v1';
+const $=id=>document.getElementById(id);
+const example=()=>({s:{}});
+let st=null,hist=[];
+const load=()=>{try{const v=JSON.parse(localStorage.getItem(KEY));return v&&v.s?v:null}catch(e){return null}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+const g=id=>st.s[id]||{l:0,n:null,a:[]};
+const lv=id=>g(id).l;
+const reqs=x=>[...(x.c||[]).map(id=>({id,need:1})),...(x.ca||[]).map(id=>({id,need:2}))];
+const canReg=x=>!x.noReg&&reqs(x).every(r=>lv(r.id)>=r.need);
+const canApr=x=>reqs(x).every(r=>lv(r.id)>=2);
+const okState=x=>{const l=lv(x.id);return l===0||(l===1?canReg(x):canApr(x))};
+const fmt=v=>v==null?'—':v.toFixed(2).replace('.',',');
+const commit=fn=>{hist.push(JSON.stringify(st));if(hist.length>80)hist.shift();fn();st.sample=false;save();render()};
+const set=(id,f)=>{st.s[id]=Object.assign({l:0,n:null,a:[]},st.s[id],f)};
+const car=()=>S.filter(x=>!x.ing);
+
+function render(){
+ $('plan').innerHTML=YN.map((t,y)=>`<div class="col"><h4>${y?y+'.º':'Ingreso'}</h4>${S.filter(x=>x.y===y).map(x=>`<button type="button" class="tile l${lv(x.id)}${x.opt?' opt':''}${okState(x)?'':' bad'}" data-go="${x.id}" title="${x.n}">${x.ab}</button>`).join('')}</div>`).join('');
+ const C=car(),apr=C.filter(x=>lv(x.id)===2),reg=C.filter(x=>lv(x.id)===1);
+ const notas=apr.map(x=>g(x.id).n).filter(n=>n!=null);
+ const aplz=C.flatMap(x=>g(x.id).a||[]);
+ const sum=a=>a.reduce((p,v)=>p+v,0);
+ const sin=notas.length?sum(notas)/notas.length:null;
+ const con=notas.length+aplz.length?(sum(notas)+sum(aplz))/(notas.length+aplz.length):null;
+ const ob=C.filter(x=>!x.opt),oa=ob.filter(x=>lv(x.id)===2).length,orr=ob.filter(x=>lv(x.id)===1).length;
+ const pa=oa/ob.length*100,pr=orr/ob.length*100;
+ $('figs').innerHTML=`
+  <div class="fig1"><b>${apr.length}</b><span>Aprobadas</span></div>
+  <div class="fig1"><b>${reg.length}</b><span>Regulares</span></div>
+  <div class="fig1"><b>${fmt(sin)}</b><span>Promedio sin aplazos</span></div>
+  <div class="fig1"><b>${fmt(con)}</b><span>Promedio con aplazos (${aplz.length} aplazo${aplz.length===1?'':'s'})</span></div>
+  <div class="fig1 wide"><b>${Math.round(pa)} %</b><span>de la carrera aprobada: ${oa} de ${ob.length} materias obligatorias</span>
+   <div class="bar" aria-hidden="true"><div style="width:${pa}%;background:#fff"></div><div style="width:${pr}%;background:var(--hl)"></div></div></div>`;
+ const sinNota=apr.filter(x=>g(x.id).n==null).length,bad=S.filter(x=>!okState(x)).length;
+ $('note').textContent=[sinNota?`${sinNota} aprobada${sinNota>1?'s':''} sin nota cargada no entra${sinNota>1?'n':''} en el promedio.`:'',bad?`${bad} materia${bad>1?'s':''} con correlativas que no cumplís (borde oscuro en el plan).`:''].filter(Boolean).join(' ');
+ $('undo').disabled=!hist.length;
+ $('yrs').innerHTML=YN.map((t,y)=>`<button type="button" data-yr="${y}">${y?y+'.º año':'Ingreso'}</button>`).join('');
+ $('mst').innerHTML=`<b>${apr.length}</b> aprob. · <b>${reg.length}</b> reg. · prom. <b>${fmt(sin)}</b> / <b>${fmt(con)}</b> c/aplazos`;
+ const cc=C.filter(x=>lv(x.id)===0&&canReg(x)),cr=C.filter(x=>lv(x.id)===1&&canApr(x));
+ const chip=x=>`<button type="button" class="chip" data-go="${x.id}">${x.n}</button>`;
+ $('canc').innerHTML=cc.length?cc.map(chip).join(''):'<p>Nada por ahora: regularizá las correlativas que faltan.</p>';
+ $('canr').innerHTML=cr.length?cr.map(chip).join(''):'<p>Ninguna regular tiene todas sus correlativas aprobadas todavía.</p>';
+ $('years').innerHTML=YN.map((t,y)=>{const L=S.filter(x=>x.y===y),na=L.filter(x=>lv(x.id)===2).length,nr=L.filter(x=>lv(x.id)===1).length;
+  return `<section class="band year" id="y${y}"><div class="wrap"><div class="yh"><h2>${y?t:'Ingreso (Ciclo de Nivelación)'}</h2><span>${na} aprobada${na===1?'':'s'} · ${nr} regular${nr===1?'':'es'} de ${L.length}</span></div><div class="grid">${L.map(card).join('')}</div></div></section>`}).join('');
+}
+function card(x){
+ const d=g(x.id),l=d.l,R=reqs(x),cr=canReg(x),ca=canApr(x);
+ const pills=R.length?`<span>${x.ca?'Para cursar y rendir:':'Para cursar:'}</span>`+R.map(r=>{const m=lv(r.id)>=r.need,need=r.need===2?'aprobada':'regular';return `<span class="pill ${m?'ok':'no'}" title="${B[r.id].n}: ${need}">${B[r.id].s} · ${need}</span>`}).join(''):'<span>Sin correlativas</span>';
+ const ra=R.length&&!x.ca&&cr&&!ca?`<span>Para rendir: todas aprobadas</span>`:'';
+ const opts=x.noReg?[[0,'Pendiente'],[2,'Aprobada']]:[[0,'Sin cursar'],[1,'Regular'],[2,'Aprobada']];
+ const seg=`<div class="seg${x.noReg?' two':''}" role="group" aria-label="Estado de ${x.n}">${opts.map(([v,t])=>{const dis=v===1?!cr:v===2?!ca:false;return `<button type="button" class="s${v}" data-set="${x.id}" data-l="${v}" aria-pressed="${l===v}" ${dis&&l!==v?'disabled':''} title="${dis?'Te faltan correlativas':''}">${t}</button>`}).join('')}</div>`;
+ const warn=okState(x)?'':`<p class="warn">Ya no cumplís las correlativas para este estado. Revisá las que no se cumplen.</p>`;
+ const gr=x.ing?'':`<div class="gr"><label for="n-${x.id}">Nota final <input type="number" id="n-${x.id}" data-nota="${x.id}" min="4" max="10" step="1" inputmode="numeric" value="${d.n??''}" ${l===2?'':'disabled'} placeholder="4–10"></label>
+  <div class="apl"><span>Aplazos:</span>${(d.a||[]).map((v,i)=>`<button type="button" class="ap" data-del="${x.id}" data-i="${i}" title="Quitar aplazo">${v} ×</button>`).join('')||'<span class="tag">ninguno</span>'}
+  <input type="number" id="a-${x.id}" min="0" max="3" step="1" inputmode="numeric" aria-label="Nota del aplazo en ${x.n}" placeholder="0–3"><button type="button" class="mini" data-add="${x.id}">Agregar</button></div></div>`;
+ return `<article class="card l${l}" id="m-${x.id}"><h3>${x.n}${x.opt?' <span class="tag">(optativa)</span>':''}</h3><div class="req">${pills}${ra}</div>${seg}${warn}${gr}</article>`;
+}
+const addAp=id=>{const inp=$('a-'+id),v=Number(inp.value);if(inp.value===''||!Number.isInteger(v)||v<0||v>3){inp.setCustomValidity('Un aplazo va de 0 a 3');inp.reportValidity();return}commit(()=>set(id,{a:[...(g(id).a||[]),v]}));const n=$('a-'+id);n&&n.focus()};
+document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+ if(t.dataset.set){const id=t.dataset.set,v=+t.dataset.l;if(lv(id)!==v)commit(()=>set(id,{l:v}))}
+ else if(t.dataset.add)addAp(t.dataset.add);
+ else if(t.dataset.del){const id=t.dataset.del,i=+t.dataset.i;commit(()=>{const a=[...(g(id).a||[])];a.splice(i,1);set(id,{a})})}
+ else if(t.dataset.yr){const s=$('y'+t.dataset.yr);s&&s.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}
+ else if(t.dataset.go){const c=$('m-'+t.dataset.go);if(c){c.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});c.classList.add('flash');setTimeout(()=>c.classList.remove('flash'),1400)}}
+});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.nota){const id=t.dataset.nota,raw=t.value;
+ if(raw===''){commit(()=>set(id,{n:null}));return}
+ const v=Number(raw);if(!Number.isInteger(v)||v<4||v>10){t.setCustomValidity('La nota de aprobación va de 4 a 10');t.reportValidity();return}
+ t.setCustomValidity('');commit(()=>set(id,{n:v}))}});
+document.addEventListener('input',e=>{if(e.target.setCustomValidity)e.target.setCustomValidity('')});
+document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t.id&&t.id.startsWith('a-')){e.preventDefault();addAp(t.id.slice(2))}});
+$('undo').addEventListener('click',()=>{if(!hist.length)return;st=JSON.parse(hist.pop());save();render()});
+let armed=null;
+$('reset').addEventListener('click',()=>{const b=$('reset');
+ if(!armed){b.textContent='¿Borrar todo? Tocá otra vez';armed=setTimeout(()=>{armed=null;b.textContent='Empezar de cero'},4000);return}
+ clearTimeout(armed);armed=null;b.textContent='Empezar de cero';commit(()=>{st.s={}})});
+$('copy').addEventListener('click',async()=>{const b=$('copy');try{await navigator.clipboard.writeText(JSON.stringify(st));b.textContent='Copiado'}catch(e){$('imp').value=JSON.stringify(st);b.closest('header').querySelector('details').open=true;b.textContent='Copialo del cuadro de abajo'}setTimeout(()=>b.textContent='Copiar mis datos',2500)});
+$('doimp').addEventListener('click',()=>{try{const v=JSON.parse($('imp').value);if(!v||typeof v.s!=='object')throw 0;for(const k in v.s){if(!B[k])delete v.s[k];else{const d=v.s[k];d.l=[0,1,2].includes(d.l)?d.l:0;d.a=Array.isArray(d.a)?d.a.filter(n=>Number.isFinite(n)):[];d.n=Number.isFinite(d.n)?d.n:null}}commit(()=>{st.s=v.s});$('impmsg').textContent='Datos importados.'}catch(e){$('impmsg').textContent='Esos datos no se pueden leer.'}});
+window.claude?.hot?.snapshot?.(()=>st);
+try{if('serviceWorker' in navigator&&/(github\.io|localhost)$/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+const start=d=>{st=(d&&d.s)?d:(load()||example());render()};
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??null);
+}
+</script>
+</body>
+</html>

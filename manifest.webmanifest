@@ -1,0 +1,16 @@
+{
+  "name": "Mi Traductorado UNC",
+  "short_name": "Traductorado",
+  "description": "Seguimiento de materias, correlativas, notas y promedios del Traductorado Público Nacional de Inglés (Facultad de Lenguas, UNC).",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#d63a76",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
