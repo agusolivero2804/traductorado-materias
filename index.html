@@ -107,6 +107,9 @@ input[type=number]{font:16px Archivo,sans-serif;width:4.4em;min-height:40px;bord
 input:disabled{opacity:.5}
 .apl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .apl>span{font-weight:600}
+.apl .mini{min-width:44px;min-height:44px;font-size:18px}
+.apl .mini:disabled{opacity:.4;cursor:default}
+.apn{min-width:2ch;text-align:center;font-size:17px;font-variant-numeric:tabular-nums}
 .mini{font:600 14px Archivo,sans-serif;min-height:40px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);padding:0 10px;cursor:pointer}
 .ap{font:600 14px Archivo,sans-serif;border:1px solid color-mix(in srgb,var(--warn) 50%,transparent);color:var(--warn);background:transparent;border-radius:999px;padding:4px 12px;cursor:pointer;min-height:40px}
 details{margin-top:14px;font-size:14px;color:#fff0f5}
@@ -152,7 +155,7 @@ footer a{color:var(--blue)}
  <div><h2>Regulares que ya podés rendir</h2><div class="chips" id="canr"></div></div>
 </div></section>
 <main id="years"></main>
-<footer>Correlatividades según la propuesta de flexibilización de la Facultad de Lenguas aprobada en 2025 (<a href="https://boletin.unc.edu.ar/bitstreams/94943d20-6d37-4f90-8a92-b4d976e6189b/download">documento oficial</a>). Para cursar hay que tener las correlativas regularizadas; para rendir, aprobadas. Gabinete de Traducción / Introducción a la Interpretación pide Lengua Inglesa III y Gramática Contrastiva aprobadas ya para cursar. Verificá con el plan vigente antes de inscribirte. Tus datos quedan guardados solo en este navegador.</footer>
+<footer>Correlatividades según la propuesta de flexibilización de la Facultad de Lenguas aprobada en 2025 (<a href="https://boletin.unc.edu.ar/bitstreams/94943d20-6d37-4f90-8a92-b4d976e6189b/download">documento oficial</a>). Para cursar hay que tener las correlativas regularizadas; para rendir, aprobadas. Gabinete de Traducción / Introducción a la Interpretación pide Lengua Inglesa III y Gramática Contrastiva aprobadas ya para cursar. Verificá con el plan vigente antes de inscribirte. Cada aplazo cuenta como un 2 en el promedio con aplazos. Tus datos quedan guardados solo en este navegador.</footer>
 <script>
 {
 const S=[
@@ -201,7 +204,9 @@ const example=()=>({s:{}});
 let st=null,hist=[];
 const load=()=>{try{const v=JSON.parse(localStorage.getItem(KEY));return v&&v.s?v:null}catch(e){return null}};
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
-const g=id=>st.s[id]||{l:0,n:null,a:[]};
+const nap=v=>Array.isArray(v)?v.length:(Number.isInteger(v)&&v>0?v:0);
+const norm=o=>{for(const k in o.s){if(!B[k]){delete o.s[k];continue}const d=o.s[k];d.l=[0,1,2].includes(d.l)?d.l:0;d.a=nap(d.a);d.n=Number.isFinite(d.n)?d.n:null}return o};
+const g=id=>st.s[id]||{l:0,n:null,a:0};
 const lv=id=>g(id).l;
 const reqs=x=>[...(x.c||[]).map(id=>({id,need:1})),...(x.ca||[]).map(id=>({id,need:2}))];
 const canReg=x=>!x.noReg&&reqs(x).every(r=>lv(r.id)>=r.need);
@@ -209,24 +214,24 @@ const canApr=x=>reqs(x).every(r=>lv(r.id)>=2);
 const okState=x=>{const l=lv(x.id);return l===0||(l===1?canReg(x):canApr(x))};
 const fmt=v=>v==null?'—':v.toFixed(2).replace('.',',');
 const commit=fn=>{hist.push(JSON.stringify(st));if(hist.length>80)hist.shift();fn();st.sample=false;save();render()};
-const set=(id,f)=>{st.s[id]=Object.assign({l:0,n:null,a:[]},st.s[id],f)};
+const set=(id,f)=>{st.s[id]=Object.assign({l:0,n:null,a:0},st.s[id],f)};
 const car=()=>S.filter(x=>!x.ing);
 
 function render(){
  $('plan').innerHTML=YN.map((t,y)=>`<div class="col"><h4>${y?y+'.º':'Ingreso'}</h4>${S.filter(x=>x.y===y).map(x=>`<button type="button" class="tile l${lv(x.id)}${x.opt?' opt':''}${okState(x)?'':' bad'}" data-go="${x.id}" title="${x.n}">${x.ab}</button>`).join('')}</div>`).join('');
  const C=car(),apr=C.filter(x=>lv(x.id)===2),reg=C.filter(x=>lv(x.id)===1);
  const notas=apr.map(x=>g(x.id).n).filter(n=>n!=null);
- const aplz=C.flatMap(x=>g(x.id).a||[]);
+ const nAp=C.reduce((p,x)=>p+nap(g(x.id).a),0),AP=2;
  const sum=a=>a.reduce((p,v)=>p+v,0);
  const sin=notas.length?sum(notas)/notas.length:null;
- const con=notas.length+aplz.length?(sum(notas)+sum(aplz))/(notas.length+aplz.length):null;
+ const con=notas.length+nAp?(sum(notas)+AP*nAp)/(notas.length+nAp):null;
  const ob=C.filter(x=>!x.opt),oa=ob.filter(x=>lv(x.id)===2).length,orr=ob.filter(x=>lv(x.id)===1).length;
  const pa=oa/ob.length*100,pr=orr/ob.length*100;
  $('figs').innerHTML=`
   <div class="fig1"><b>${apr.length}</b><span>Aprobadas</span></div>
   <div class="fig1"><b>${reg.length}</b><span>Regulares</span></div>
   <div class="fig1"><b>${fmt(sin)}</b><span>Promedio sin aplazos</span></div>
-  <div class="fig1"><b>${fmt(con)}</b><span>Promedio con aplazos (${aplz.length} aplazo${aplz.length===1?'':'s'})</span></div>
+  <div class="fig1"><b>${fmt(con)}</b><span>Promedio con aplazos (${nAp} aplazo${nAp===1?'':'s'}, cada uno vale 2)</span></div>
   <div class="fig1 wide"><b>${Math.round(pa)} %</b><span>de la carrera aprobada: ${oa} de ${ob.length} materias obligatorias</span>
    <div class="bar" aria-hidden="true"><div style="width:${pa}%;background:#fff"></div><div style="width:${pr}%;background:var(--hl)"></div></div></div>`;
  const sinNota=apr.filter(x=>g(x.id).n==null).length,bad=S.filter(x=>!okState(x)).length;
@@ -249,14 +254,12 @@ function card(x){
  const seg=`<div class="seg${x.noReg?' two':''}" role="group" aria-label="Estado de ${x.n}">${opts.map(([v,t])=>{const dis=v===1?!cr:v===2?!ca:false;return `<button type="button" class="s${v}" data-set="${x.id}" data-l="${v}" aria-pressed="${l===v}" ${dis&&l!==v?'disabled':''} title="${dis?'Te faltan correlativas':''}">${t}</button>`}).join('')}</div>`;
  const warn=okState(x)?'':`<p class="warn">Ya no cumplís las correlativas para este estado. Revisá las que no se cumplen.</p>`;
  const gr=x.ing?'':`<div class="gr"><label for="n-${x.id}">Nota final <input type="number" id="n-${x.id}" data-nota="${x.id}" min="4" max="10" step="1" inputmode="numeric" value="${d.n??''}" ${l===2?'':'disabled'} placeholder="4–10"></label>
-  <div class="apl"><span title="Agregá uno por cada examen desaprobado, con su nota">Aplazos:</span>${(d.a||[]).map((v,i)=>`<button type="button" class="ap" data-del="${x.id}" data-i="${i}" title="Quitar aplazo">${v} ×</button>`).join('')||'<span class="tag">ninguno</span>'}
-  <input type="number" id="a-${x.id}" min="0" max="3" step="1" inputmode="numeric" aria-label="Nota del aplazo en ${x.n} (0 a 3)" placeholder="nota" title="Nota con la que te aplazaron (0 a 3)"><button type="button" class="mini" data-add="${x.id}">+ Aplazo</button></div></div>`;
+  <div class="apl"><span>Aplazos:</span><button type="button" class="mini" data-ap="${x.id}" data-d="-1" ${nap(d.a)?'':'disabled'} aria-label="Quitar un aplazo en ${x.n}">−</button><b class="apn" aria-live="polite">${nap(d.a)}</b><button type="button" class="mini" data-ap="${x.id}" data-d="1" aria-label="Sumar un aplazo en ${x.n}">+</button></div></div>`;
  return `<article class="card l${l}" id="m-${x.id}"><h3>${x.n}${x.opt?' <span class="tag">(optativa)</span>':''}</h3><div class="req">${pills}${ra}</div>${seg}${warn}${gr}</article>`;
 }
-const addAp=id=>{const inp=$('a-'+id),v=Number(inp.value);if(inp.value===''||!Number.isInteger(v)||v<0||v>3){inp.setCustomValidity('Poné la nota con la que te aplazaron: de 0 a 3. Podés agregar todos los aplazos que quieras.');inp.reportValidity();return}commit(()=>set(id,{a:[...(g(id).a||[]),v]}));const n=$('a-'+id);n&&n.focus()};
 document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
  if(t.dataset.set){const id=t.dataset.set,v=+t.dataset.l;if(lv(id)!==v)commit(()=>set(id,{l:v}))}
- else if(t.dataset.add)addAp(t.dataset.add);
+ else if(t.dataset.ap){const id=t.dataset.ap,v=Math.max(0,nap(g(id).a)+(+t.dataset.d));if(v!==nap(g(id).a))commit(()=>set(id,{a:v}))}
  else if(t.dataset.del){const id=t.dataset.del,i=+t.dataset.i;commit(()=>{const a=[...(g(id).a||[])];a.splice(i,1);set(id,{a})})}
  else if(t.dataset.yr){const s=$('y'+t.dataset.yr);s&&s.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}
  else if(t.dataset.go){const c=$('m-'+t.dataset.go);if(c){c.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});c.classList.add('flash');setTimeout(()=>c.classList.remove('flash'),1400)}}
@@ -266,17 +269,16 @@ document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.
  const v=Number(raw);if(!Number.isInteger(v)||v<4||v>10){t.setCustomValidity('La nota de aprobación va de 4 a 10');t.reportValidity();return}
  t.setCustomValidity('');commit(()=>set(id,{n:v}))}});
 document.addEventListener('input',e=>{if(e.target.setCustomValidity)e.target.setCustomValidity('')});
-document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t.id&&t.id.startsWith('a-')){e.preventDefault();addAp(t.id.slice(2))}});
 $('undo').addEventListener('click',()=>{if(!hist.length)return;st=JSON.parse(hist.pop());save();render()});
 let armed=null;
 $('reset').addEventListener('click',()=>{const b=$('reset');
  if(!armed){b.textContent='¿Borrar todo? Tocá otra vez';armed=setTimeout(()=>{armed=null;b.textContent='Empezar de cero'},4000);return}
  clearTimeout(armed);armed=null;b.textContent='Empezar de cero';commit(()=>{st.s={}})});
 $('copy').addEventListener('click',async()=>{const b=$('copy');try{await navigator.clipboard.writeText(JSON.stringify(st));b.textContent='Copiado'}catch(e){$('imp').value=JSON.stringify(st);b.closest('header').querySelector('details').open=true;b.textContent='Copialo del cuadro de abajo'}setTimeout(()=>b.textContent='Copiar mis datos',2500)});
-$('doimp').addEventListener('click',()=>{try{const v=JSON.parse($('imp').value);if(!v||typeof v.s!=='object')throw 0;for(const k in v.s){if(!B[k])delete v.s[k];else{const d=v.s[k];d.l=[0,1,2].includes(d.l)?d.l:0;d.a=Array.isArray(d.a)?d.a.filter(n=>Number.isFinite(n)):[];d.n=Number.isFinite(d.n)?d.n:null}}commit(()=>{st.s=v.s});$('impmsg').textContent='Datos importados.'}catch(e){$('impmsg').textContent='Esos datos no se pueden leer.'}});
+$('doimp').addEventListener('click',()=>{try{const v=JSON.parse($('imp').value);if(!v||typeof v.s!=='object')throw 0;norm(v);commit(()=>{st.s=v.s});$('impmsg').textContent='Datos importados.'}catch(e){$('impmsg').textContent='Esos datos no se pueden leer.'}});
 window.claude?.hot?.snapshot?.(()=>st);
 try{if('serviceWorker' in navigator&&/(github\.io|localhost)$/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
-const start=d=>{st=(d&&d.s)?d:(load()||example());render()};
+const start=d=>{st=norm((d&&d.s)?d:(load()||example()));render()};
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??null);
 }
 </script>

@@ -9,8 +9,8 @@ App web para llevar el seguimiento de la carrera **Traductorado Público Naciona
 - Respeta las correlativas:
   - Para marcar una materia como regular, tenés que tener sus correlativas **regularizadas**.
   - Para marcarla como aprobada, tenés que tener sus correlativas **aprobadas**.
-- Te deja cargar la **nota final** y los **aplazos** de cada materia.
-- Calcula el promedio **sin aplazos** y **con aplazos**.
+- Te deja cargar la **nota final** de cada materia y la **cantidad de aplazos**, con botones − / +.
+- Calcula el promedio **sin aplazos** y **con aplazos**. En el promedio con aplazos, cada aplazo cuenta como un 2.
 - Tiene contadores de materias aprobadas y regulares.
 - Muestra el porcentaje de la carrera aprobada. Para el porcentaje cuenta las 31 materias obligatorias: deja afuera el ingreso y las optativas de Latín.
 - Lista las materias a las que ya te podés anotar y las regulares que ya podés rendir.
